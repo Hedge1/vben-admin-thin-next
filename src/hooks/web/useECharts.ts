@@ -1,31 +1,46 @@
 import { useTimeoutFn } from '/@/hooks/core/useTimeout';
-import { tryOnUnmounted } from '/@/utils/helper/vueHelper';
-import { unref, Ref, nextTick } from 'vue';
-import type { EChartOption, ECharts } from 'echarts';
-import echarts from 'echarts';
+import { tryOnUnmounted } from '@vueuse/core';
+import { unref, Ref, nextTick, watch, computed, ref } from 'vue';
+import type { EChartsOption } from 'echarts';
 import { useDebounce } from '/@/hooks/core/useDebounce';
 import { useEventListener } from '/@/hooks/event/useEventListener';
 import { useBreakpoint } from '/@/hooks/event/useBreakpoint';
 
-export type { EChartOption, ECharts };
+import echarts from '/@/plugins/echarts';
+import { useRootSetting } from '../setting/useRootSetting';
+
 export function useECharts(
   elRef: Ref<HTMLDivElement>,
   theme: 'light' | 'dark' | 'default' = 'light'
 ) {
-  let chartInstance: Nullable<ECharts> = null;
+  const { getDarkMode } = useRootSetting();
+  let chartInstance: echarts.ECharts | null = null;
   let resizeFn: Fn = resize;
+  const cacheOptions = ref<EChartsOption>({});
   let removeResizeFn: Fn = () => {};
 
   const [debounceResize] = useDebounce(resize, 200);
   resizeFn = debounceResize;
 
-  function init() {
-    const el = unref(elRef);
+  const getOptions = computed(
+    (): EChartsOption => {
+      if (getDarkMode.value !== 'dark') {
+        return cacheOptions.value;
+      }
+      return {
+        backgroundColor: 'transparent',
+        ...cacheOptions.value,
+      };
+    }
+  );
 
+  function initCharts(t = theme) {
+    const el = unref(elRef);
     if (!el || !unref(el)) {
       return;
     }
-    chartInstance = echarts.init(el, theme);
+
+    chartInstance = echarts.init(el, t);
     const { removeEvent } = useEventListener({
       el: window,
       name: 'resize',
@@ -33,32 +48,49 @@ export function useECharts(
     });
     removeResizeFn = removeEvent;
     const { widthRef, screenEnum } = useBreakpoint();
-    if (unref(widthRef) <= screenEnum.MD) {
+    if (unref(widthRef) <= screenEnum.MD || el.offsetHeight === 0) {
       useTimeoutFn(() => {
         resizeFn();
       }, 30);
     }
   }
 
-  function setOptions(options: any, clear = true) {
+  function setOptions(options: EChartsOption, clear = true) {
+    cacheOptions.value = options;
+    if (unref(elRef)?.offsetHeight === 0) {
+      useTimeoutFn(() => {
+        setOptions(unref(getOptions));
+      }, 30);
+      return;
+    }
     nextTick(() => {
       useTimeoutFn(() => {
         if (!chartInstance) {
-          init();
+          initCharts(getDarkMode.value);
 
           if (!chartInstance) return;
         }
-        clear && chartInstance.clear();
+        clear && chartInstance?.clear();
 
-        chartInstance && chartInstance.setOption(options);
+        chartInstance?.setOption(unref(getOptions));
       }, 30);
     });
   }
 
   function resize() {
-    if (!chartInstance) return;
-    chartInstance.resize();
+    chartInstance?.resize();
   }
+
+  watch(
+    () => getDarkMode.value,
+    (theme) => {
+      if (chartInstance) {
+        chartInstance.dispose();
+        initCharts(theme);
+        setOptions(cacheOptions.value);
+      }
+    }
+  );
 
   tryOnUnmounted(() => {
     if (!chartInstance) return;
@@ -69,7 +101,7 @@ export function useECharts(
 
   return {
     setOptions,
-    echarts,
     resize,
+    echarts,
   };
 }

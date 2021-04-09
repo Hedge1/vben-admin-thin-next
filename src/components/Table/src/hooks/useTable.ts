@@ -1,42 +1,76 @@
 import type { BasicTableProps, TableActionType, FetchParams, BasicColumn } from '../types/table';
 import type { PaginationProps } from '../types/pagination';
+import type { DynamicProps } from '/#/utils';
+import type { FormActionType } from '/@/components/Form';
+import type { WatchStopHandle } from 'vue';
 
-import { ref, getCurrentInstance, onUnmounted, unref } from 'vue';
+import { getDynamicProps } from '/@/utils';
+import { ref, onUnmounted, unref, watch, toRaw } from 'vue';
 import { isProdMode } from '/@/utils/env';
+import { error } from '/@/utils/log';
+
+type Props = Partial<DynamicProps<BasicTableProps>>;
+
+type UseTableMethod = TableActionType & {
+  getForm: () => FormActionType;
+};
 
 export function useTable(
-  tableProps?: Partial<BasicTableProps>
-): [(instance: TableActionType) => void, TableActionType] {
-  if (!getCurrentInstance()) {
-    throw new Error('Please put useTable function in the setup function!');
+  tableProps?: Props
+): [
+  (instance: TableActionType, formInstance: UseTableMethod) => void,
+  TableActionType & {
+    getForm: () => FormActionType;
   }
+] {
+  const tableRef = ref<Nullable<TableActionType>>(null);
+  const loadedRef = ref<Nullable<boolean>>(false);
+  const formRef = ref<Nullable<UseTableMethod>>(null);
 
-  const tableRef = ref<TableActionType | null>(null);
-  const loadedRef = ref<boolean | null>(false);
+  let stopWatch: WatchStopHandle;
 
-  function register(instance: TableActionType) {
-    onUnmounted(() => {
-      tableRef.value = null;
-      loadedRef.value = null;
-    });
-    if (unref(loadedRef) && isProdMode() && instance === unref(tableRef)) {
-      return;
-    }
+  function register(instance: TableActionType, formInstance: UseTableMethod) {
+    isProdMode() &&
+      onUnmounted(() => {
+        tableRef.value = null;
+        loadedRef.value = null;
+      });
+
+    if (unref(loadedRef) && isProdMode() && instance === unref(tableRef)) return;
+
     tableRef.value = instance;
-    tableProps && instance.setProps(tableProps);
+    formRef.value = formInstance;
+    tableProps && instance.setProps(getDynamicProps(tableProps));
     loadedRef.value = true;
+
+    stopWatch?.();
+
+    stopWatch = watch(
+      () => tableProps,
+      () => {
+        tableProps && instance.setProps(getDynamicProps(tableProps));
+      },
+      {
+        immediate: true,
+        deep: true,
+      }
+    );
   }
 
   function getTableInstance(): TableActionType {
     const table = unref(tableRef);
     if (!table) {
-      throw new Error('table is undefined!');
+      error(
+        'The table instance has not been obtained yet, please make sure the table is presented when performing the table operation!'
+      );
     }
-    return table;
+    return table as TableActionType;
   }
 
-  const methods: TableActionType = {
-    reload: (opt?: FetchParams) => {
+  const methods: TableActionType & {
+    getForm: () => FormActionType;
+  } = {
+    reload: async (opt?: FetchParams) => {
       getTableInstance().reload(opt);
     },
     setProps: (props: Partial<BasicTableProps>) => {
@@ -53,8 +87,7 @@ export function useTable(
     },
     getColumns: ({ ignoreIndex = false }: { ignoreIndex?: boolean } = {}) => {
       const columns = getTableInstance().getColumns({ ignoreIndex }) || [];
-
-      return columns;
+      return toRaw(columns);
     },
     setColumns: (columns: BasicColumn[]) => {
       getTableInstance().setColumns(columns);
@@ -69,10 +102,10 @@ export function useTable(
       getTableInstance().deleteSelectRowByKey(key);
     },
     getSelectRowKeys: () => {
-      return getTableInstance().getSelectRowKeys();
+      return toRaw(getTableInstance().getSelectRowKeys());
     },
     getSelectRows: () => {
-      return getTableInstance().getSelectRows();
+      return toRaw(getTableInstance().getSelectRows());
     },
     clearSelectedRowKeys: () => {
       getTableInstance().clearSelectedRowKeys();
@@ -84,9 +117,33 @@ export function useTable(
       return getTableInstance().getPaginationRef();
     },
     getSize: () => {
-      return getTableInstance().getSize();
+      return toRaw(getTableInstance().getSize());
     },
-  } as TableActionType;
+    updateTableData: (index: number, key: string, value: any) => {
+      return getTableInstance().updateTableData(index, key, value);
+    },
+    getRowSelection: () => {
+      return toRaw(getTableInstance().getRowSelection());
+    },
+    getCacheColumns: () => {
+      return toRaw(getTableInstance().getCacheColumns());
+    },
+    getForm: () => {
+      return (unref(formRef) as unknown) as FormActionType;
+    },
+    setShowPagination: async (show: boolean) => {
+      getTableInstance().setShowPagination(show);
+    },
+    getShowPagination: () => {
+      return toRaw(getTableInstance().getShowPagination());
+    },
+    expandAll: () => {
+      getTableInstance().expandAll();
+    },
+    collapseAll: () => {
+      getTableInstance().collapseAll();
+    },
+  };
 
   return [register, methods];
 }

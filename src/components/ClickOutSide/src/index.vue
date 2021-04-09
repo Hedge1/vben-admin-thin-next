@@ -1,19 +1,23 @@
 <template>
-  <div ref="wrap"><slot /></div>
+  <div ref="wrap">
+    <slot></slot>
+  </div>
 </template>
 <script lang="ts">
-  import type { Ref } from 'vue';
-  import { defineComponent, ref } from 'vue';
-
-  import { useClickOutside } from '/@/hooks/web/useClickOutside';
-
+  import { defineComponent, ref, onMounted } from 'vue';
+  import { onClickOutside } from '@vueuse/core';
   export default defineComponent({
     name: 'ClickOutSide',
+    emits: ['mounted', 'clickOutside'],
     setup(_, { emit }) {
       const wrap = ref<ElRef>(null);
 
-      useClickOutside(wrap as Ref<HTMLDivElement>, () => {
+      onClickOutside(wrap, () => {
         emit('clickOutside');
+      });
+
+      onMounted(() => {
+        emit('mounted');
       });
 
       return { wrap };

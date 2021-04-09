@@ -1,11 +1,6 @@
 <template>
-  <Scrollbar
-    ref="scrollbarRef"
-    :wrapClass="`scrollbar__wrap`"
-    :viewClass="`scrollbar__view`"
-    class="scroll-container"
-  >
-    <slot />
+  <Scrollbar ref="scrollbarRef" class="scroll-container" v-bind="$attrs">
+    <slot></slot>
   </Scrollbar>
 </template>
 
@@ -23,11 +18,15 @@
 
       function scrollTo(to: number, duration = 500) {
         const scrollbar = unref(scrollbarRef);
-        if (!scrollbar) return;
+        if (!scrollbar) {
+          return;
+        }
 
         nextTick(() => {
           const wrap = unref(scrollbar.wrap);
-          if (!wrap) return;
+          if (!wrap) {
+            return;
+          }
           const { start } = useScrollTo({
             el: wrap,
             to,
@@ -39,17 +38,23 @@
 
       function getScrollWrap() {
         const scrollbar = unref(scrollbarRef);
-        if (!scrollbar) return null;
+        if (!scrollbar) {
+          return null;
+        }
         return scrollbar.wrap;
       }
 
       function scrollBottom() {
         const scrollbar = unref(scrollbarRef);
-        if (!scrollbar) return;
+        if (!scrollbar) {
+          return;
+        }
 
         nextTick(() => {
           const wrap = unref(scrollbar.wrap);
-          if (!wrap) return;
+          if (!wrap) {
+            return;
+          }
           const scrollHeight = wrap.scrollHeight as number;
           const { start } = useScrollTo({
             el: wrap,

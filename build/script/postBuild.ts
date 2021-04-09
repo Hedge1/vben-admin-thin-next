@@ -1,35 +1,22 @@
 // #!/usr/bin/env node
 
-import { sh } from 'tasksfile';
-
-import { argv } from 'yargs';
 import { runBuildConfig } from './buildConf';
-// import { runUpdateHtml } from './updateHtml';
-import { errorConsole, successConsole } from '../utils';
-import { startGzipStyle } from '../vite/plugin/gzip/compress';
+import chalk from 'chalk';
 
-export const runBuild = async (preview = false) => {
+import pkg from '../../package.json';
+
+export const runBuild = async () => {
   try {
-    const argvList = argv._;
-    if (preview) {
-      let cmd = `cross-env NODE_ENV=production vite build`;
-      await sh(cmd, {
-        async: true,
-        nopipe: true,
-      });
-    }
+    const argvList = process.argv.splice(2);
 
     // Generate configuration file
-    if (!argvList.includes('no-conf')) {
+    if (!argvList.includes('disabled-config')) {
       await runBuildConfig();
     }
-    // await runUpdateHtml();
-    if (!preview) {
-      await startGzipStyle();
-    }
-    successConsole('Vite Build successfully!');
+
+    console.log(`✨ ${chalk.cyan(`[${pkg.name}]`)}` + ' - build successfully!');
   } catch (error) {
-    errorConsole('Vite Build Error\n' + error);
+    console.log(chalk.red('vite build error:\n' + error));
     process.exit(1);
   }
 };

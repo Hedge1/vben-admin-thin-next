@@ -1,14 +1,26 @@
-import type { ProjectConfig } from '/@/types/config';
-
-import { MenuTypeEnum, MenuModeEnum, TriggerEnum } from '/@/enums/menuEnum';
+import type { ProjectConfig } from '/#/config';
+import { MenuTypeEnum, MenuModeEnum, TriggerEnum, MixSidebarTriggerEnum } from '/@/enums/menuEnum';
 import { CacheTypeEnum } from '/@/enums/cacheEnum';
-import { ContentEnum, PermissionModeEnum, ThemeEnum, RouterTransitionEnum } from '/@/enums/appEnum';
-import { primaryColor } from '../../build/config/lessModifyVars';
+import {
+  ContentEnum,
+  PermissionModeEnum,
+  ThemeEnum,
+  RouterTransitionEnum,
+  SettingButtonPositionEnum,
+} from '/@/enums/appEnum';
+import { SIDE_BAR_BG_COLOR_LIST, HEADER_PRESET_BG_COLOR_LIST } from './designSetting';
+import { primaryColor } from '../../build/config/themeConfig';
 
 // ! You need to clear the browser cache after the change
 const setting: ProjectConfig = {
   // Whether to show the configuration button
   showSettingButton: true,
+
+  // Whether to show the theme switch button
+  showDarkModeToggle: true,
+
+  // `Settings` button position
+  settingButtonPosition: SettingButtonPositionEnum.AUTO,
 
   // Permission mode
   permissionMode: PermissionModeEnum.ROLE,
@@ -17,7 +29,6 @@ const setting: ProjectConfig = {
   permissionCacheType: CacheTypeEnum.LOCAL,
 
   // color
-  // TODO Theme color
   themeColor: primaryColor,
 
   // Website gray mode, open for possible mourning dates
@@ -38,21 +49,10 @@ const setting: ProjectConfig = {
   // Whether to show footer
   showFooter: false,
 
-  // locale setting
-  locale: {
-    show: true,
-    // Locale
-    lang: 'zh_CN',
-    // Default locale
-    fallback: 'zh_CN',
-    // available Locales
-    availableLocales: ['zh_CN', 'en'],
-  },
-
   // Header configuration
   headerSetting: {
     // header bg color
-    bgColor: '#ffffff',
+    bgColor: HEADER_PRESET_BG_COLOR_LIST[0],
     // Fixed at the top
     fixed: true,
     // Whether to show top
@@ -65,7 +65,7 @@ const setting: ProjectConfig = {
     // Whether to show the full screen button
     showFullScreen: true,
     // Whether to show the document button
-    showDoc: false,
+    showDoc: true,
     // Whether to show the notification button
     showNotice: true,
     // Whether to display the menu search
@@ -75,7 +75,7 @@ const setting: ProjectConfig = {
   // Menu configuration
   menuSetting: {
     // sidebar menu bg color
-    bgColor: '#273352',
+    bgColor: SIDE_BAR_BG_COLOR_LIST[0],
     //  Whether to fix the left menu
     fixed: true,
     // Menu collapse
@@ -105,6 +105,12 @@ const setting: ProjectConfig = {
     trigger: TriggerEnum.HEADER,
     // Turn on accordion mode, only show a menu
     accordion: true,
+    // Switch page to close menu
+    closeMixSidebarOnChange: false,
+    // Module opening method ‘click’ |'hover'
+    mixSideTrigger: MixSidebarTriggerEnum.CLICK,
+    // Fixed expanded menu
+    mixSideFixed: false,
   },
 
   // Multi-label
@@ -118,6 +124,8 @@ const setting: ProjectConfig = {
 
     // Whether to show the refresh button
     showRedo: true,
+    // Whether to show the collapse button
+    showFold: true,
   },
 
   // Transition Setting
@@ -163,7 +171,7 @@ const setting: ProjectConfig = {
 
   // Whether to cancel the http request that has been sent but not responded when switching the interface.
   // If it is enabled, I want to overwrite a single interface. Can be set in a separate interface
-  removeAllHttpPending: true,
+  removeAllHttpPending: false,
 };
 
 export default setting;

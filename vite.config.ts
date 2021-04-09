@@ -1,112 +1,107 @@
-import type { UserConfig, Resolver } from 'vite';
+import type { UserConfig, ConfigEnv } from 'vite';
+
+import { loadEnv } from 'vite';
 import { resolve } from 'path';
 
-import { modifyVars } from './build/config/lessModifyVars';
+import { generateModifyVars } from './build/generate/generateModifyVars';
 import { createProxy } from './build/vite/proxy';
-import { configManualChunk } from './build/vite/optimizer';
+import { wrapperEnv } from './build/utils';
+import { createVitePlugins } from './build/vite/plugin';
+import { OUTPUT_DIR } from './build/constant';
 
-import globbyTransform from './build/vite/plugin/transform/globby';
-import dynamicImportTransform from './build/vite/plugin/transform/dynamic-import';
-
-import { loadEnv } from './build/utils';
-
-import { createRollupPlugin, createVitePlugins } from './build/vite/plugin';
-
-const pkg = require('./package.json');
-
-const viteEnv = loadEnv();
-
-const { VITE_PORT, VITE_PUBLIC_PATH, VITE_PROXY, VITE_DROP_CONSOLE, VITE_DYNAMIC_IMPORT } = viteEnv;
+import pkg from './package.json';
+import moment from 'moment';
 
 function pathResolve(dir: string) {
-  return resolve(__dirname, '.', dir);
+  return resolve(process.cwd(), '.', dir);
 }
 
-const alias: Record<string, string> = {
-  '/@/': pathResolve('src'),
+const { dependencies, devDependencies, name, version } = pkg;
+const __APP_INFO__ = {
+  pkg: { dependencies, devDependencies, name, version },
+  lastBuildTime: moment().format('YYYY-MM-DD HH:mm:ss'),
 };
 
-const root: string = process.cwd();
+export default ({ command, mode }: ConfigEnv): UserConfig => {
+  const root = process.cwd();
 
-const resolvers: Resolver[] = [];
+  const env = loadEnv(mode, root);
 
-const viteConfig: UserConfig = {
-  root,
-  alias,
-  /**
-   * port
-   * @default '3000'
-   */
-  port: VITE_PORT,
+  // The boolean type read by loadEnv is a string. This function can be converted to boolean type
+  const viteEnv = wrapperEnv(env);
 
-  /**
-   * Base public path when served in production.
-   * @default '/'
-   */
-  base: VITE_PUBLIC_PATH,
+  const { VITE_PORT, VITE_PUBLIC_PATH, VITE_PROXY, VITE_DROP_CONSOLE } = viteEnv;
 
-  /**
-   * Transpile target for esbuild.
-   * @default 'es2020'
-   */
-  esbuildTarget: 'es2019',
+  const isBuild = command === 'build';
 
-  // terser options
-  terserOptions: {
-    compress: {
-      keep_infinity: true,
-      drop_console: VITE_DROP_CONSOLE,
+  return {
+    base: VITE_PUBLIC_PATH,
+    root,
+    resolve: {
+      alias: [
+        // /@/xxxx => src/xxxx
+        {
+          find: /\/@\//,
+          replacement: pathResolve('src') + '/',
+        },
+        // /#/xxxx => types/xxxx
+        {
+          find: /\/#\//,
+          replacement: pathResolve('types') + '/',
+        },
+        // ['@vue/compiler-sfc', '@vue/compiler-sfc/dist/compiler-sfc.esm-browser.js'],
+      ],
     },
-  },
-
-  define: {
-    __VERSION__: pkg.version,
-    // setting vue-i18-next
-    // Suppress warning
-    __VUE_I18N_LEGACY_API__: false,
-    __VUE_I18N_FULL_INSTALL__: false,
-    __INTLIFY_PROD_DEVTOOLS__: false,
-  },
-
-  cssPreprocessOptions: {
-    less: {
-      modifyVars: modifyVars,
-      javascriptEnabled: true,
+    server: {
+      port: VITE_PORT,
+      // Load proxy configuration from .env
+      proxy: createProxy(VITE_PROXY),
     },
-  },
+    build: {
+      target: 'es2015',
+      outDir: OUTPUT_DIR,
+      terserOptions: {
+        compress: {
+          keep_infinity: true,
+          // Used to delete console in production environment
+          drop_console: VITE_DROP_CONSOLE,
+        },
+      },
+      // Turning off brotliSize display can slightly reduce packaging time
+      brotliSize: false,
+      chunkSizeWarningLimit: 1500,
+    },
+    define: {
+      // setting vue-i18-next
+      // Suppress warning
+      __VUE_I18N_LEGACY_API__: false,
+      __VUE_I18N_FULL_INSTALL__: false,
+      __INTLIFY_PROD_DEVTOOLS__: false,
 
-  // The package will be recompiled using rollup, and the new package compiled into the esm module specification will be put into node_modules/.vite_opt_cache
-  optimizeDeps: {
-    include: [
-      'qs',
-      'ant-design-vue/es/locale/zh_CN',
-      'ant-design-vue/es/locale/en_US',
-      '@ant-design/icons-vue',
-    ],
-  },
+      __APP_INFO__: JSON.stringify(__APP_INFO__),
+    },
+    css: {
+      preprocessorOptions: {
+        less: {
+          modifyVars: generateModifyVars(),
+          javascriptEnabled: true,
+        },
+      },
+    },
 
-  transforms: [
-    globbyTransform({
-      resolvers: resolvers,
-      root: root,
-      alias: alias,
-      includes: [resolve('src/router'), resolve('src/locales')],
-    }),
-    dynamicImportTransform(VITE_DYNAMIC_IMPORT),
-  ],
+    // The vite plugin used by the project. The quantity is large, so it is separately extracted and managed
+    plugins: createVitePlugins(viteEnv, isBuild),
 
-  proxy: createProxy(VITE_PROXY),
-
-  plugins: createVitePlugins(viteEnv),
-
-  rollupInputOptions: {
-    plugins: createRollupPlugin(),
-  },
-
-  rollupOutputOptions: {
-    compact: true,
-    manualChunks: configManualChunk,
-  },
+    optimizeDeps: {
+      // @iconify/iconify: The dependency is dynamically and virtually loaded by @purge-icons/generated, so it needs to be specified explicitly
+      include: [
+        '@iconify/iconify',
+        'ant-design-vue/es/locale/zh_CN',
+        'moment/dist/locale/zh-cn',
+        'ant-design-vue/es/locale/en_US',
+        'moment/dist/locale/eu',
+      ],
+      exclude: ['vue-demi', 'consolidate'],
+    },
+  };
 };
-
-export default viteConfig;

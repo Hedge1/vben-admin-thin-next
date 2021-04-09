@@ -2,7 +2,9 @@
   <Footer :class="prefixCls" v-if="getShowLayoutFooter">
     <div :class="`${prefixCls}__links`">
       <a @click="openWindow(SITE_URL)">{{ t('layout.footer.onlinePreview') }}</a>
+
       <GithubFilled @click="openWindow(GITHUB_URL)" :class="`${prefixCls}__github`" />
+
       <a @click="openWindow(DOC_URL)">{{ t('layout.footer.onlineDocument') }}</a>
     </div>
     <div>Copyright &copy;2020 Vben Admin</div>
@@ -40,7 +42,6 @@
   });
 </script>
 <style lang="less" scoped>
-  @import (reference) '../../../design/index.less';
   @prefix-cls: ~'@{namespace}-layout-footer';
 
   @normal-color: rgba(0, 0, 0, 0.45);

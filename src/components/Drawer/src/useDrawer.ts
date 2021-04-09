@@ -6,23 +6,32 @@ import type {
   UseDrawerInnerReturnType,
 } from './types';
 
-import { ref, getCurrentInstance, unref, reactive, watchEffect, nextTick, toRaw } from 'vue';
+import {
+  ref,
+  getCurrentInstance,
+  unref,
+  reactive,
+  watchEffect,
+  nextTick,
+  toRaw,
+  computed,
+} from 'vue';
 
 import { isProdMode } from '/@/utils/env';
 import { isFunction } from '/@/utils/is';
-import { tryOnUnmounted } from '/@/utils/helper/vueHelper';
+import { tryOnUnmounted } from '@vueuse/core';
+
 import { isEqual } from 'lodash-es';
+import { error } from '/@/utils/log';
 
 const dataTransferRef = reactive<any>({});
+
+const visibleData = reactive<{ [key: number]: boolean }>({});
 
 /**
  * @description: Applicable to separate drawer and call outside
  */
 export function useDrawer(): UseDrawerReturnType {
-  if (!getCurrentInstance()) {
-    throw new Error('Please put useDrawer function in the setup function!');
-  }
-
   const drawerRef = ref<DrawerInstance | null>(null);
   const loadedRef = ref<Nullable<boolean>>(false);
   const uidRef = ref<string>('');
@@ -41,35 +50,43 @@ export function useDrawer(): UseDrawerReturnType {
     uidRef.value = uuid;
     drawerRef.value = drawerInstance;
     loadedRef.value = true;
+
+    drawerInstance.emitVisible = (visible: boolean, uid: number) => {
+      visibleData[uid] = visible;
+    };
   }
 
   const getInstance = () => {
     const instance = unref(drawerRef);
     if (!instance) {
-      throw new Error('instance is undefined!');
+      error('useDrawer instance is undefined!');
     }
     return instance;
   };
 
   const methods: ReturnMethods = {
     setDrawerProps: (props: Partial<DrawerProps>): void => {
-      getInstance().setDrawerProps(props);
+      getInstance()?.setDrawerProps(props);
     },
 
+    getVisible: computed((): boolean => {
+      return visibleData[~~unref(uidRef)];
+    }),
+
     openDrawer: <T = any>(visible = true, data?: T, openOnSet = true): void => {
-      getInstance().setDrawerProps({
+      getInstance()?.setDrawerProps({
         visible: visible,
       });
       if (!data) return;
 
       if (openOnSet) {
         dataTransferRef[unref(uidRef)] = null;
-        dataTransferRef[unref(uidRef)] = data;
+        dataTransferRef[unref(uidRef)] = toRaw(data);
         return;
       }
-      const equal = isEqual(toRaw(dataTransferRef[unref(uidRef)]), data);
+      const equal = isEqual(toRaw(dataTransferRef[unref(uidRef)]), toRaw(data));
       if (!equal) {
-        dataTransferRef[unref(uidRef)] = data;
+        dataTransferRef[unref(uidRef)] = toRaw(data);
       }
     },
   };
@@ -79,17 +96,18 @@ export function useDrawer(): UseDrawerReturnType {
 
 export const useDrawerInner = (callbackFn?: Fn): UseDrawerInnerReturnType => {
   const drawerInstanceRef = ref<Nullable<DrawerInstance>>(null);
-  const currentInstall = getCurrentInstance();
+  const currentInstance = getCurrentInstance();
   const uidRef = ref<string>('');
 
-  if (!currentInstall) {
-    throw new Error('useDrawerInner instance is undefined!');
+  if (!currentInstance) {
+    error('useDrawerInner instance is undefined!');
   }
 
   const getInstance = () => {
     const instance = unref(drawerInstanceRef);
     if (!instance) {
-      throw new Error('useDrawerInner instance is undefined!');
+      error('useDrawerInner instance is undefined!');
+      return;
     }
     return instance;
   };
@@ -102,7 +120,7 @@ export const useDrawerInner = (callbackFn?: Fn): UseDrawerInnerReturnType => {
 
     uidRef.value = uuid;
     drawerInstanceRef.value = modalInstance;
-    currentInstall.emit('register', modalInstance, uuid);
+    currentInstance?.emit('register', modalInstance, uuid);
   };
 
   watchEffect(() => {
@@ -118,19 +136,22 @@ export const useDrawerInner = (callbackFn?: Fn): UseDrawerInnerReturnType => {
     register,
     {
       changeLoading: (loading = true) => {
-        getInstance().setDrawerProps({ loading });
+        getInstance()?.setDrawerProps({ loading });
       },
 
       changeOkLoading: (loading = true) => {
-        getInstance().setDrawerProps({ confirmLoading: loading });
+        getInstance()?.setDrawerProps({ confirmLoading: loading });
       },
+      getVisible: computed((): boolean => {
+        return visibleData[~~unref(uidRef)];
+      }),
 
       closeDrawer: () => {
-        getInstance().setDrawerProps({ visible: false });
+        getInstance()?.setDrawerProps({ visible: false });
       },
 
       setDrawerProps: (props: Partial<DrawerProps>) => {
-        getInstance().setDrawerProps(props);
+        getInstance()?.setDrawerProps(props);
       },
     },
   ];

@@ -2,9 +2,9 @@
   <Layout :class="prefixCls">
     <LayoutFeatures />
     <LayoutHeader fixed v-if="getShowFullHeaderRef" />
-    <Layout>
+    <Layout :class="layoutClass">
       <LayoutSideBar v-if="getShowSidebar || getIsMobile" />
-      <Layout :class="`${prefixCls}__main`">
+      <Layout :class="`${prefixCls}-main`">
         <LayoutMultipleHeader />
         <LayoutContent />
         <LayoutFooter />
@@ -14,7 +14,7 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent } from 'vue';
+  import { defineComponent, computed, unref } from 'vue';
   import { Layout } from 'ant-design-vue';
   import { createAsyncComponent } from '/@/utils/factory/createAsyncComponent';
 
@@ -27,7 +27,6 @@
   import { useMenuSetting } from '/@/hooks/setting/useMenuSetting';
   import { useDesign } from '/@/hooks/web/useDesign';
 
-  import { registerGlobComp } from '/@/components/registerGlobComp';
   import { useAppInject } from '/@/hooks/web/useAppInject';
 
   export default defineComponent({
@@ -42,30 +41,28 @@
       Layout,
     },
     setup() {
-      // ! Only register global components here
-      // ! Can reduce the size of the first screen code
-      // default layout It is loaded after login. So it won’t be packaged to the first screen
-      registerGlobComp();
-
       const { prefixCls } = useDesign('default-layout');
 
       const { getIsMobile } = useAppInject();
 
       const { getShowFullHeaderRef } = useHeaderSetting();
 
-      const { getShowSidebar } = useMenuSetting();
+      const { getShowSidebar, getIsMixSidebar } = useMenuSetting();
+
+      const layoutClass = computed(() => ({ 'ant-layout-has-sider': unref(getIsMixSidebar) }));
 
       return {
         getShowFullHeaderRef,
         getShowSidebar,
         prefixCls,
         getIsMobile,
+        getIsMixSidebar,
+        layoutClass,
       };
     },
   });
 </script>
 <style lang="less">
-  @import (reference) '../../design/index.less';
   @prefix-cls: ~'@{namespace}-default-layout';
 
   .@{prefix-cls} {
@@ -79,7 +76,7 @@
       min-height: 100%;
     }
 
-    &__main {
+    &-main {
       margin-left: 1px;
     }
   }

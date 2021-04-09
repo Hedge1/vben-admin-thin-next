@@ -1,19 +1,19 @@
-import type { ProjectConfig } from '/@/types/config';
+import type { ProjectConfig } from '/#/config';
+import type { BeforeMiniState } from '../types';
 
 import { VuexModule, getModule, Module, Mutation, Action } from 'vuex-module-decorators';
 import store from '/@/store';
 
-import { PROJ_CFG_KEY } from '/@/enums/cacheEnum';
+import { PROJ_CFG_KEY, APP_DARK_MODE_KEY_ } from '/@/enums/cacheEnum';
 
 import { hotModuleUnregisterModule } from '/@/utils/helper/vuexHelper';
-import { setLocal, getLocal, clearSession, clearLocal } from '/@/utils/helper/persistent';
+import { Persistent } from '/@/utils/cache/persistent';
 import { deepMerge } from '/@/utils';
 
 import { resetRouter } from '/@/router';
-import { permissionStore } from './permission';
-import { tabStore } from './tab';
+import { ThemeEnum } from '../../enums/appEnum';
 
-import { userStore } from './user';
+import { darkMode } from '/@/settings/designSetting';
 
 export interface LockInfo {
   pwd: string | undefined;
@@ -24,18 +24,31 @@ let timeId: TimeoutHandle;
 const NAME = 'app';
 hotModuleUnregisterModule(NAME);
 @Module({ dynamic: true, namespaced: true, store, name: NAME })
-class App extends VuexModule {
+export default class App extends VuexModule {
+  private darkMode;
+
   // Page loading status
   private pageLoadingState = false;
 
   // project config
-  private projectConfigState: ProjectConfig | null = getLocal(PROJ_CFG_KEY);
+  private projectConfigState: ProjectConfig | null = Persistent.getLocal(PROJ_CFG_KEY);
 
   // set main overflow hidden
   private lockMainScrollState = false;
 
+  // When the window shrinks, remember some states, and restore these states when the window is restored
+  private beforeMiniState: BeforeMiniState = {};
+
   get getPageLoading() {
     return this.pageLoadingState;
+  }
+
+  get getDarkMode() {
+    return this.darkMode || localStorage.getItem(APP_DARK_MODE_KEY_) || darkMode;
+  }
+
+  get getBeforeMiniState() {
+    return this.beforeMiniState;
   }
 
   get getLockMainScrollState() {
@@ -52,6 +65,17 @@ class App extends VuexModule {
   }
 
   @Mutation
+  commitDarkMode(mode: ThemeEnum): void {
+    this.darkMode = mode;
+    localStorage.setItem(APP_DARK_MODE_KEY_, mode);
+  }
+
+  @Mutation
+  commitBeforeMiniState(state: BeforeMiniState): void {
+    this.beforeMiniState = state;
+  }
+
+  @Mutation
   commitLockMainScrollState(lock: boolean): void {
     this.lockMainScrollState = lock;
   }
@@ -59,18 +83,13 @@ class App extends VuexModule {
   @Mutation
   commitProjectConfigState(proCfg: DeepPartial<ProjectConfig>): void {
     this.projectConfigState = deepMerge(this.projectConfigState || {}, proCfg);
-    setLocal(PROJ_CFG_KEY, this.projectConfigState);
+    Persistent.setLocal(PROJ_CFG_KEY, this.projectConfigState);
   }
 
   @Action
   async resumeAllState() {
     resetRouter();
-    clearSession();
-    clearLocal();
-
-    permissionStore.commitResetState();
-    tabStore.commitResetState();
-    userStore.commitResetState();
+    Persistent.clearAll();
   }
 
   @Action

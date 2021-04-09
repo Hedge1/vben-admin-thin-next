@@ -1,34 +1,27 @@
 <template>
-  <div :class="[prefixCls, getLayoutContentMode]">
-    <transition name="fade">
-      <Loading
-        v-if="getOpenPageLoading"
-        :loading="getPageLoading"
-        background="rgba(240, 242, 245, 0.6)"
-        absolute
-        :class="`${prefixCls}-loading`"
-      />
-    </transition>
+  <div :class="[prefixCls, getLayoutContentMode]" v-loading="getOpenPageLoading && getPageLoading">
     <PageLayout />
   </div>
 </template>
 <script lang="ts">
   import { defineComponent } from 'vue';
 
+  import PageLayout from '/@/layouts/page/index.vue';
+
   import { useDesign } from '/@/hooks/web/useDesign';
   import { useRootSetting } from '/@/hooks/setting/useRootSetting';
   import { useTransitionSetting } from '/@/hooks/setting/useTransitionSetting';
-  import PageLayout from '/@/layouts/page/index';
-  import { Loading } from '/@/components/Loading';
+  import { useContentViewHeight } from './useContentViewHeight';
 
   export default defineComponent({
     name: 'LayoutContent',
-    components: { PageLayout, Loading },
+    components: { PageLayout },
     setup() {
       const { prefixCls } = useDesign('layout-content');
       const { getOpenPageLoading } = useTransitionSetting();
       const { getLayoutContentMode, getPageLoading } = useRootSetting();
 
+      useContentViewHeight();
       return {
         prefixCls,
         getOpenPageLoading,
@@ -39,7 +32,6 @@
   });
 </script>
 <style lang="less">
-  @import (reference) '../../../design/index.less';
   @prefix-cls: ~'@{namespace}-layout-content';
 
   .@{prefix-cls} {

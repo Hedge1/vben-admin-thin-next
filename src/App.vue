@@ -1,11 +1,7 @@
 <template>
-  <ConfigProvider
-    v-bind="lockEvent"
-    :locale="antConfigLocale"
-    :transform-cell-text="transformCellText"
-  >
+  <ConfigProvider v-bind="lockEvent" :locale="getAntdLocale">
     <AppProvider>
-      <router-view />
+      <RouterView />
     </AppProvider>
   </ConfigProvider>
 </template>
@@ -13,13 +9,13 @@
 <script lang="ts">
   import { defineComponent } from 'vue';
   import { ConfigProvider } from 'ant-design-vue';
+  import { AppProvider } from '/@/components/Application';
 
-  import { getConfigProvider, initAppConfigStore } from '/@/setup/App';
+  import { initAppConfigStore } from '/@/logics/initAppConfig';
 
   import { useLockPage } from '/@/hooks/web/useLockPage';
-  import { useLocale } from '/@/hooks/web/useLocale';
-
-  import { AppProvider } from '/@/components/Application';
+  import { useTitle } from '/@/hooks/web/useTitle';
+  import { useLocale } from '/@/locales/useLocale';
 
   export default defineComponent({
     name: 'App',
@@ -28,20 +24,15 @@
       // Initialize vuex internal system configuration
       initAppConfigStore();
 
-      // Get ConfigProvider configuration
-      const { transformCellText } = getConfigProvider();
+      useTitle();
+
+      // support Multi-language
+      const { getAntdLocale } = useLocale();
 
       // Create a lock screen monitor
       const lockEvent = useLockPage();
 
-      // support Multi-language
-      const { antConfigLocale } = useLocale();
-
-      return {
-        transformCellText,
-        antConfigLocale,
-        lockEvent,
-      };
+      return { getAntdLocale, lockEvent };
     },
   });
 </script>

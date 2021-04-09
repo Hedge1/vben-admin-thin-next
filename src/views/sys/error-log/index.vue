@@ -1,9 +1,9 @@
 <template>
   <div class="p-4">
-    <template v-for="src in imgListRef" :key="src">
+    <template v-for="src in imgList" :key="src">
       <img :src="src" v-show="false" />
     </template>
-    <DetailModal :info="rowInfoRef" @register="registerModal" />
+    <DetailModal :info="rowInfo" @register="registerModal" />
     <BasicTable @register="register" class="error-handle-table">
       <template #toolbar>
         <a-button @click="fireVueError" type="primary">
@@ -39,17 +39,18 @@
 
   import { errorStore, ErrorInfo } from '/@/store/modules/error';
 
+  // import { fireErrorApi } from '/@/api/demo/error';
+
   import { getColumns } from './data';
 
   import { cloneDeep } from 'lodash-es';
-  import { isDevMode } from '/@/utils/env';
 
   export default defineComponent({
     name: 'ErrorHandler',
     components: { DetailModal, BasicTable, TableAction },
     setup() {
-      const rowInfoRef = ref<ErrorInfo>();
-      const imgListRef = ref<string[]>([]);
+      const rowInfo = ref<ErrorInfo>();
+      const imgList = ref<string[]>([]);
 
       const { t } = useI18n();
 
@@ -77,12 +78,12 @@
         }
       );
       const { createMessage } = useMessage();
-      if (isDevMode()) {
+      if (import.meta.env.DEV) {
         createMessage.info(t('sys.errorLog.enableMessage'));
       }
       // 查看详情
       function handleDetail(row: ErrorInfo) {
-        rowInfoRef.value = row;
+        rowInfo.value = row;
         openModal(true);
       }
 
@@ -91,7 +92,7 @@
       }
 
       function fireResourceError() {
-        imgListRef.value.push(`${new Date().getTime()}.png`);
+        imgList.value.push(`${new Date().getTime()}.png`);
       }
 
       async function fireAjaxError() {
@@ -105,8 +106,8 @@
         fireVueError,
         fireResourceError,
         fireAjaxError,
-        imgListRef,
-        rowInfoRef,
+        imgList,
+        rowInfo,
         t,
       };
     },

@@ -1,39 +1,44 @@
 <template>
   <div :class="[prefixCls, `${prefixCls}--${theme}`]">
     <a-breadcrumb :routes="routes">
-      <template #itemRender="{ route, routes }">
-        <Icon :icon="route.meta.icon" v-if="getShowBreadCrumbIcon && route.meta.icon" />
-        <span v-if="routes.indexOf(route) === routes.length - 1">
-          {{ t(route.meta.title) }}
+      <template #itemRender="{ route, routes, paths }">
+        <Icon :icon="getIcon(route)" v-if="getShowBreadCrumbIcon && getIcon(route)" />
+        <span v-if="!hasRedirect(routes, route)">
+          {{ t(route.name || route.meta.title) }}
         </span>
-        <router-link v-else :to="route.path">
-          {{ t(route.meta.title) }}
+        <router-link v-else to="" @click="handleClick(route, paths, $event)">
+          {{ t(route.name || route.meta.title) }}
         </router-link>
       </template>
     </a-breadcrumb>
   </div>
 </template>
 <script lang="ts">
-  import { defineComponent, ref, toRaw, watchEffect } from 'vue';
-  import { useI18n } from 'vue-i18n';
-
   import type { RouteLocationMatched } from 'vue-router';
-  import { useRouter } from 'vue-router';
-  import { filter } from '/@/utils/helper/treeHelper';
-  import { REDIRECT_NAME } from '/@/router/constant';
-  import Icon from '/@/components/Icon';
+  import type { Menu } from '/@/router/types';
 
-  import { HomeOutlined } from '@ant-design/icons-vue';
-  import { PageEnum } from '/@/enums/pageEnum';
+  import { defineComponent, ref, watchEffect } from 'vue';
+
+  import { Breadcrumb } from 'ant-design-vue';
+  import Icon from '/@/components/Icon';
 
   import { useDesign } from '/@/hooks/web/useDesign';
   import { useRootSetting } from '/@/hooks/setting/useRootSetting';
+  import { useGo } from '/@/hooks/web/usePage';
+  import { useI18n } from '/@/hooks/web/useI18n';
+  import { useRouter } from 'vue-router';
 
   import { propTypes } from '/@/utils/propTypes';
+  import { isString } from '/@/utils/is';
+  import { filter } from '/@/utils/helper/treeHelper';
+  import { getMenus } from '/@/router/menus';
+
+  import { REDIRECT_NAME } from '/@/router/constant';
+  import { getAllParentPath } from '/@/router/helper/menuHelper';
 
   export default defineComponent({
     name: 'LayoutBreadcrumb',
-    components: { HomeOutlined, Icon },
+    components: { Icon, [Breadcrumb.name]: Breadcrumb },
     props: {
       theme: propTypes.oneOf(['dark', 'light']),
     },
@@ -44,45 +49,112 @@
       const { getShowBreadCrumbIcon } = useRootSetting();
 
       const { t } = useI18n();
-      watchEffect(() => {
-        if (currentRoute.value.name === REDIRECT_NAME) {
-          return;
+      watchEffect(async () => {
+        if (currentRoute.value.name === REDIRECT_NAME) return;
+        const menus = await getMenus();
+
+        const routeMatched = currentRoute.value.matched;
+        const cur = routeMatched?.[routeMatched.length - 1];
+        let path = currentRoute.value.path;
+
+        if (cur && cur?.meta?.currentActiveMenu) {
+          path = cur.meta.currentActiveMenu as string;
         }
-        const matched = currentRoute.value.matched;
+
+        const parent = getAllParentPath(menus, path);
+        const filterMenus = menus.filter((item) => item.path === parent[0]);
+        const matched = getMatched(filterMenus, parent) as any;
+
         if (!matched || matched.length === 0) return;
 
-        let breadcrumbList = filter(toRaw(matched), (item) => {
-          if (!item.meta) {
-            return false;
+        const breadcrumbList = filterItem(matched);
+
+        if (currentRoute.value.meta?.currentActiveMenu) {
+          breadcrumbList.push(({
+            ...currentRoute.value,
+            name: currentRoute.value.meta?.title || currentRoute.value.name,
+          } as unknown) as RouteLocationMatched);
+        }
+        routes.value = breadcrumbList;
+      });
+
+      function getMatched(menus: Menu[], parent: string[]) {
+        const metched: Menu[] = [];
+        menus.forEach((item) => {
+          if (parent.includes(item.path)) {
+            metched.push({
+              ...item,
+              name: item.meta?.title || item.name,
+            });
           }
-          const { title, hideBreadcrumb } = item.meta;
-          if (!title || hideBreadcrumb) {
+          if (item.children?.length) {
+            metched.push(...getMatched(item.children, parent));
+          }
+        });
+        return metched;
+      }
+
+      function filterItem(list: RouteLocationMatched[]) {
+        let resultList = filter(list, (item) => {
+          const { meta, name } = item;
+          if (!meta) {
+            return !!name;
+          }
+          const { title, hideBreadcrumb, hideMenu } = meta;
+          if (!title || hideBreadcrumb || hideMenu) {
             return false;
           }
           return true;
-        });
+        }).filter((item) => !item.meta?.hideBreadcrumb || !item.meta?.hideMenu);
 
-        const filterBreadcrumbList = breadcrumbList.filter(
-          (item) => item.path !== PageEnum.BASE_HOME
-        );
+        return resultList;
+      }
 
-        if (filterBreadcrumbList.length === breadcrumbList.length) {
-          filterBreadcrumbList.unshift(({
-            path: PageEnum.BASE_HOME,
-            meta: {
-              title: t('layout.header.home'),
-            },
-          } as unknown) as RouteLocationMatched);
+      function handleClick(route: RouteLocationMatched, paths: string[], e: Event) {
+        e?.preventDefault();
+        const { children, redirect, meta } = route;
+
+        if (children?.length && !redirect) {
+          e?.stopPropagation();
+          return;
         }
-        routes.value = filterBreadcrumbList.length === 1 ? [] : filterBreadcrumbList;
-      });
+        if (meta?.carryParam) {
+          return;
+        }
 
-      return { routes, t, prefixCls, getShowBreadCrumbIcon };
+        const go = useGo();
+        if (redirect && isString(redirect)) {
+          go(redirect);
+        } else {
+          let goPath = '';
+          if (paths.length === 1) {
+            goPath = paths[0];
+          } else {
+            const ps = paths.slice(1);
+            const lastPath = ps.pop() || '';
+            goPath = `${lastPath}`;
+          }
+          goPath = /^\//.test(goPath) ? goPath : `/${goPath}`;
+          go(goPath);
+        }
+      }
+
+      function hasRedirect(routes: RouteLocationMatched[], route: RouteLocationMatched) {
+        if (routes.indexOf(route) === routes.length - 1) {
+          return false;
+        }
+        return true;
+      }
+
+      function getIcon(route) {
+        return route.icon || route.meta?.icon;
+      }
+
+      return { routes, t, prefixCls, getIcon, getShowBreadCrumbIcon, handleClick, hasRedirect };
     },
   });
 </script>
 <style lang="less">
-  @import (reference) '../../../../design/index.less';
   @prefix-cls: ~'@{namespace}-layout-breadcrumb';
 
   .@{prefix-cls} {
@@ -102,7 +174,7 @@
         color: @breadcrumb-item-normal-color;
 
         a {
-          color: @text-color-base;
+          color: rgba(0, 0, 0, 0.65);
 
           &:hover {
             color: @primary-color;

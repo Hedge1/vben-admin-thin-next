@@ -1,36 +1,57 @@
 <template>
-  <div class="basic-table-img__preview" v-if="imgList && imgList.length">
-    <template v-for="(img, index) in imgList" :key="img">
-      <img :width="size" @click="handlePreview(index)" :src="img" />
-    </template>
+  <div
+    :class="prefixCls"
+    class="flex mx-auto items-center"
+    v-if="imgList && imgList.length"
+    :style="getWrapStyle"
+  >
+    <PreviewGroup>
+      <template v-for="img in imgList" :key="img">
+        <Image :width="size" :src="img" />
+      </template>
+    </PreviewGroup>
   </div>
 </template>
 <script lang="ts">
-  import { defineComponent, PropType } from 'vue';
-  import { createImgPreview } from '/@/components/Preview/index';
+  import type { CSSProperties } from 'vue';
+  import { defineComponent, computed } from 'vue';
+  import { useDesign } from '/@/hooks/web/useDesign';
+
+  import { Image } from 'ant-design-vue';
+  import { propTypes } from '/@/utils/propTypes';
 
   export default defineComponent({
-    name: 'TableAction',
+    name: 'TableImage',
+    components: { Image, PreviewGroup: Image.PreviewGroup },
     props: {
-      imgList: {
-        type: Array as PropType<string[]>,
-        default: null,
-      },
-      size: {
-        type: Number as PropType<number>,
-        default: 40,
-      },
+      imgList: propTypes.arrayOf(propTypes.string),
+      size: propTypes.number.def(40),
     },
     setup(props) {
-      function handlePreview(index: number) {
-        const { imgList } = props;
+      const getWrapStyle = computed(
+        (): CSSProperties => {
+          const { size } = props;
+          const s = `${size}px`;
+          return { height: s, width: s };
+        }
+      );
 
-        createImgPreview({
-          imageList: imgList as string[],
-          index: index,
-        });
-      }
-      return { handlePreview };
+      const { prefixCls } = useDesign('basic-table-img');
+      return { prefixCls, getWrapStyle };
     },
   });
 </script>
+<style lang="less">
+  @prefix-cls: ~'@{namespace}-basic-table-img';
+
+  .@{prefix-cls} {
+    .ant-image {
+      margin-right: 4px;
+      cursor: zoom-in;
+
+      img {
+        border-radius: 2px;
+      }
+    }
+  }
+</style>

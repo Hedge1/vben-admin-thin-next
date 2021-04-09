@@ -1,3 +1,365 @@
+## Wip
+
+### 🐛 Bug Fixes
+
+- 登录页样式修复
+- 修复菜单已知问题
+
+## 2.2.0 (2021-04-06)
+
+### ✨ Features
+
+- 新增`headerTitle` slot
+- 新增打印示例
+- 新增关于界面
+
+### ✨ Refactor
+
+- 移除 useFullScreen 函数
+- tinymce 由 Cdn 改为 npm(打包体积偏大)
+- Dashboard 重构
+- 移除 ApexCharts 及示例
+
+### 🐛 Bug Fixes
+
+- 确保面包屑正确的显示图标
+- 修复 tinymce 上传按钮全屏模式下消失问题
+- 确保 title 在重新登录后正常改变
+- 确保后台模式登录正常
+- 修复 TableAction 点击事件问题
+
+## 2.1.1 (2021-03-26)
+
+### ✨ Features
+
+- 路由新增 hideChildrenInMenu 配置。用于隐藏子菜单
+- 树形表格内置展开/折叠全部函数
+
+### ✨ Refactor
+
+- 重构路由多层模式,解决嵌套 keepalive 执行多次问题
+
+### 🐛 Bug Fixes
+
+- 确保 CountDownInput 组件重置清空值
+- 修复分割模式下在小屏幕中显示问题
+- 修复表格高度计算问题
+- 修复后台路由获取不到组件问题
+- 修复 Modal 组件 loadingTip 配置不生效
+- 修复后台权限指令不生效
+- 确保 progress 进度条正确关闭
+- 修复表格勾选列配置失效问题
+- 确保一级菜单可以被隐藏
+- 确保表单隐藏字段校验正常
+
+### 🎫 Chores
+
+- 移除 ls-lint
+
+## 2.1.0 (2021-03-15)
+
+### ✨ Features
+
+- 图标选择器新增 svg 模式
+- 新增时间组件
+- 新增高德/百度/谷歌地图示例
+
+### ✨ Refactor
+
+- 重构项目以解决循环依赖项导致的热更新问题
+- 移除 vueHelper/useClickoutside,使用@vueuse/core 代替
+
+### 🐛 Bug Fixes
+
+- 确保 `table action` 的值被正确更新
+- 修复页面切换的动画无法关闭
+- 修复`PageWrapper`title 不显示
+- 修复表格已知问题
+- 修复 BasicTree 组件不能自定义 title 问题
+- 修复主题切换后按钮样式问题
+
+## 2.0.3 (2021-03-07)
+
+### ✨ Features
+
+- `BasicTree` 新增`clickRowToExpand`,用于单击树节点展开
+- 新增 SvgIcon 插件及示例
+- 账号管理界面增加左侧部门树·
+
+### ⚡ Performance Improvements
+
+- 表格关闭分页时不再携带分页参数
+- 登录页监听回车事件进行登录
+- 当表格设置自适应大小时,根据屏幕来铺满了高度.
+- Tree 滚动条优化
+- 优化本地开发加载速度
+
+### 🐛 Bug Fixes
+
+- 修复`Description`已知问题
+- 修复`BasicForm`已知问题
+- 修复`BasicTree`下 ActionItem 的 show 属性逻辑问题
+- 修复树组件 demo 示例样式错误
+- 修复账号管理新增未清空旧数据
+- form 组件应允许 setFieldsValue 方法值为 null 或者 undefined
+- 确保单级面包屑正确跳转
+- 确保 Form 组件不校验隐藏的表单项
+
+## 2.0.2 (2021-03-04)
+
+### ✨ Refactor
+
+- 重构多语言模块,支持懒加载及远程加载
+
+### ✨ Features
+
+- axios 支持 form-data 格式请求
+- 新增图标选择器组件(支持本地和在线方式)
+- 新增 WebSocket 示例和服务脚本
+- Tree 组件新增 `renderIcon` 属性用于控制层级图标显示
+- Tree->actionItem 新增 show 属性，用于动态控制按钮显示
+- Tree 新增工具栏/title/搜索功能
+- 新增部门管理/修改密码/账号管理/角色管理/菜单管理示例界面
+
+### ⚡ Performance Improvements
+
+- 登录界面动画优化
+- 修复 github 仓库体积过大问题.
+- 默认隐藏表格全屏按钮
+- `crypto-es`改为`crypto-js`，减小打包体积
+- `types`目录移动到根目录,兼容其他目录全局类型
+
+### 🐛 Bug Fixes
+
+- 修复验证码组件警告问题
+- 修复表格不能正确的获取选中行
+- 修复全屏状态下 modal 高度计算错误
+- 修复部分表格样式问题
+- 修复树形表格 `indentSize`设置失效
+
+## 2.0.1 (2021-02-21)
+
+### ✨ Refactor
+
+- 登录页重构,新增注册页面/重置密码页面/手机登录/二维码登录
+
+### ✨ Features
+
+- 新增 `settingButtonPosition`配置项,用于配置`设置`按钮位置
+- `modal`可以通过双击头部切换全屏
+- 新增`CountDownInput`组件
+
+### ⚡ Performance Improvements
+
+- 优化可编辑居中样式及下拉框宽度过短
+- 表格新增编辑时`edit-change`事件监听
+
+### 🐛 Bug Fixes
+
+- 修复图片预览样式错误
+- 修复图标样式问题
+- 修复可编辑表格下拉回显问题
+
+## 2.0.0 (2021-02-18)
+
+## (破坏性更新) Breaking changes
+
+- `echarts` 升级到 5.0,并且进行按需引入(只需使用 `useECharts` 即可).
+
+### ✨ Refactor
+
+- 移除`global.less`,`mixin.less`,`design/helper`,由`windicss`代替,有用到的需要修改对应的样式
+
+### ✨ Features
+
+- useModal 新增返回值函数 `redoModalHeight`,用于在 modal 内为动态内容时刷新 modal 高度
+- 升级 husky 到 5.0
+- 新增 `brotli`|`gzip`压缩及相关测试命令
+- 重新引入 `windicss` (与`tailwind`一样).在速度上更快
+
+### ⚡ Performance Improvements
+
+- 调整获取用户信息接口返回值为数组格式
+- 将 error-log 列表固定为系统路由
+
+### 🐛 Bug Fixes
+
+- 修复 Upload 组件 maxNumber 失效问题
+- 修复打包 sourcemap 报错
+- 修复代码 debugger 位置显示错误
+- 修复 mock 插件 post 请求错误问题
+- 修复部分主题颜色值错误
+- 修复表格在可编辑行状态回车确认
+
+### 🎫 Chores
+
+- 文档更新
+- 升级 ant-design-vue 到 `2.0.0`
+- 升级 vite 到 `2.0.0`
+
+## 2.0.0-rc.18 (2021-02-05)
+
+### ✨ Features
+
+- `ApiSelect`新增 `numberToString`属性,用于将 value 为`number`的值全部转化为`string`
+- 新增主题色切换
+- 打包图片压缩
+
+### ⚡ Performance Improvements
+
+当不使用 mock 时,将 `mock.js` 移出打包文件
+
+### 🐛 Bug Fixes
+
+- 修复 modal 高度计算错误
+- 修复菜单折叠状态下点击标签页弹出菜单
+- 修复 form 表单初始化值为 0 问题
+- 修复表格换行问题
+- 修复菜单外链不跳转
+- 修复菜单顶部显示问题
+- 修复`modifyVars`配置失效问题
+
+## 2.0.0-rc.17 (2021-01-18)
+
+### ✨ Refactor
+
+- 新增 `SimpleMenu`组件替代左侧菜单组件(顶部菜单没有替换,功能尽量做到简单不卡)。解决菜单卡顿问题。
+- `ant-design-vue`组件不再全局注册。以便于更好配合 css 按需引入。如果需要全局注册,需要自己加
+
+### ✨ Features
+
+- `css` 按需引入
+
+### 🐛 Bug Fixes
+
+- 修复 `TableAction`图标问题
+- 修复菜单折叠按钮丢失问题
+- 修复菜单相关问题
+- 修复 moment 多语言问题
+
+## 2.0.0-rc.16 (2021-01-12)
+
+### ✨ Refactor
+
+- 独立组件配置到 `/@/settings/componentsSetting`
+- `colorSetting`和`designSetting`现在合并为`designSetting`
+- `ant-design-vue`组件注册移动到`components/registerComponent`
+- 移除 `setup` 文件夹
+- 升级到`vite2`
+- 图片预览改为`Image`组件实现,暂时移除函数式使用方式
+
+### ✨ Features
+
+- 新增`mixSideTrigger`配置。用于配置左侧混合模式菜单打开方式。可选`hover`,默认`click`
+- 新增`mixSideFixed`配置。用于固定左侧混合模式菜单
+- modal 组件新增`height`和`min-height`属性
+- 新增`PageWrapper`组件。并应用于示例页面
+- 新增标签页折叠功能
+- 兼容旧版浏览器
+- tinymce 新增图片上传
+
+### 🐛 Bug Fixes
+
+- 修复表格列配置已知问题
+- 恢复 table 的`isTreeTable`属性
+- 修复表格内存溢出问题
+- 修复`layout` 收缩展开功能在分割模式下失效
+- 修复 modal 高度计算错误
+- 修复文件上传错误
+- 修复表格已知问题
+
+### 🎫 Chores
+
+- 文档更新
+
+## 2.0.0-rc.15 (2020-12-31)
+
+### ✨ 表格破坏性更新
+
+- 重构了可编辑单元格及可编辑行。具体看示例。写法已改变。针对可编辑表格。
+
+- 表格编辑支持表单校验
+
+- 在表格列配置增加了以下配置
+
+```bash
+{
+
+  # 默认是否显示列。不显示的可以在列配置打开
+  defaultHidden?: boolean;
+  # 列头右侧帮助文本
+  helpMessage?: string | string[];
+  # 自定义格式化 单元格内容。 支持时间/枚举自动转化
+  format?: CellFormat;
+
+  # Editable
+  # 是否是可编辑单元格
+  edit?: boolean;
+  # 是否是可编辑行
+  editRow?: boolean;
+  # 编辑状态。
+  editable?: boolean;
+  #  编辑组件
+  editComponent?: ComponentType;
+  # 所对应组件的参数
+  editComponentProps?: Recordable;
+  # 校验
+  editRule?: boolean | ((text: string, record: Recordable) => Promise<string>);
+  # 值枚举转化
+  editValueMap?: (value: any) => string;
+  # 触发编辑正航
+  record.onEditRow?: () => void;
+}
+
+```
+
+### ✨ 表格重构
+
+- 新增`clickToRowSelect`属性。用于控制点击行是否选中勾选框
+- 监听行点击事件
+- 表格列配置按钮增加 列拖拽，列固定功能。
+- 表格列配置新增`defaultHidden` 属性。用于默认隐藏。可在表格列配置勾选显示
+- 更强大的列配置
+- useTable:支持动态改变参数。可以传入`Ref`类型与`Computed`类型进行动态更改
+- useTable:新增返回 `getForm`函数。可以用于操作表格内的表单
+- 修复表格已知的问题
+
+### ✨ Features
+
+- 新增 `v-ripple`水波纹指令
+- 新增左侧菜单混合模式
+- 新增 markdown 嵌入表单内示例
+- 新增主框架外页面示例
+- `route.meta` 新增`currentActiveMenu`,`hideTab`,`hideMenu`参数 用于控制详情页面包屑级菜单显示隐藏。
+- 新增面包屑导航示例
+- form: 新增`suffix`属性，用于配置后缀内容
+- form: 新增远程下拉`ApiSelect`及示例
+- form: 新增`autoFocusFirstItem`配置。用于配置是否聚焦表单第一个输入框
+- useForm: 支持动态改变参数。可以传入`Ref`类型与`Computed`类型进行动态更改
+
+### ⚡ Performance Improvements
+
+- 优化`modal`与`drawer`滚动条组件
+- table: 移除 `isTreeTable`属性
+- 全局引入`less`文件。无需手动在组件再次引入
+
+### 🎫 Chores
+
+- 升级`ant-design-vue`到`2.0.0-rc.7`
+- 升级`vue`到`3.0.5`
+
+### 🐛 Bug Fixes
+
+- 修复混合模式下滚动条丢失问题
+- 修复环境变量配置失效以及 history 模式下 logo 地址问题
+- 修复图表库切换页面导致宽高计算错误
+- 修复多语言配置 `Locale.show`导致配置不生效
+- 修复路由类型错误
+- 修复菜单分割时权限失效问题
+- 关闭多标签页时 iframe 提前加载
+- 修复`modal`与`drawer`已知问题
+- 修复左侧菜单混合模式适配问题
+
 ## 2.0.0-rc.14 (2020-12-15)
 
 ### ✨ Features

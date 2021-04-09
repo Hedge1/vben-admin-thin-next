@@ -1,3 +1,356 @@
+## 2.2.0 (2021-04-06)
+
+### ✨ Features
+
+- Added `headerTitle` slot
+- New printing example
+- Added about interface
+
+### ✨ Refactor
+
+- Remove useFullScreen function
+- tinymce changed from Cdn to npm (the package size is too large)
+- Dashboard refactoring
+- Remove ApexCharts and examples
+
+### 🐛 Bug Fixes
+
+- Make sure the breadcrumbs are displayed correctly
+- Fixed the issue of tinymce upload button disappearing in full screen mode
+- Make sure that the title changes normally after logging in again
+- Ensure that the background mode login is normal
+- Fix TableAction click event issue
+
+## 2.1.1 (2021-03-26)
+
+### ✨ Features
+
+- Added hideChildrenInMenu configuration for routing. Used to hide submenu
+- Built-in expand/collapse all functions in the tree form
+
+### ✨ Refactor
+
+- Refactor the routing multi-layer mode to solve the problem of multiple implementations of nested keepalives
+
+### 🐛 Bug Fixes
+
+- Ensure that the CountDownInput component is reset to the empty value
+- Fix the display problem on the small screen in split mode
+- Fix table height calculation problem
+- Fix the problem that components cannot be obtained by background routing
+- Fix Modal component loadingTip configuration does not take effect
+- Fix the background permission command does not take effect
+- Make sure the progress bar is closed properly
+- Fix the problem of invalid table check column configuration
+- Ensure that the first level menu can be hidden
+- Ensure that the hidden fields of the form are verified properly
+
+### 🎫 Chores
+
+- Remove ls-lint
+
+### 🎫 Chores
+
+- 移除 ls-lint
+
+## 2.1.0 (2021-03-15)
+
+### ✨ Features
+
+- Added svg mode to icon selector
+- Added time component
+- Added AutoNavi/Baidu/Google Map example
+
+### ✨ Refactor
+
+- Refactor the project to solve the hot update problem caused by circular dependencies
+- Remove vueHelper/useClickoutside, use @vueuse/core instead
+
+### 🐛 Bug Fixes
+
+- Ensure that the value of `table action` is updated correctly
+- Fix the animation of page switching cannot be closed
+- Fix `PageWrapper`title not showing
+- Fix the known issues of the table
+- Fix the problem that the BasicTree component can't customize the title
+- Fix the button style problem after theme switching
+
+## 2.0.3 (2021-03-07)
+
+### ✨ Features
+
+- `BasicTree` added `clickRowToExpand`, used to click tree node to expand
+- Added SvgIcon plugin and examples
+- Add the department tree on the left side of the account management interface·
+
+### ⚡ Performance Improvements
+
+- Pagination parameters are no longer carried when the table is closed
+- The login page monitors the carriage return event to log in
+- When the adaptive size of the table is set, the height is filled according to the screen.
+- Tree scroll bar optimization
+- Optimize the loading speed of local development
+
+### 🐛 Bug Fixes
+
+- Fix known issues with `Description`
+- Fix known issues with `BasicForm`
+- Fix the logic problem of show attribute of ActionItem under `BasicTree`
+- Fix the style error of the tree component demo example
+- Repair account management to add new but not cleared old data
+- The form component should allow the setFieldsValue method to be null or undefined
+- Ensure that the single-level breadcrumbs jump correctly
+- Ensure that the Form component does not verify hidden form items
+
+## 2.0.2 (2021-03-04)
+
+### ✨ Refactor
+
+- Refactored multi-language modules to support lazy loading and remote loading
+
+### ✨ Features
+
+- axios supports form-data format request
+- Added icon selector component (support local and online methods)
+- Added WebSocket examples and service scripts
+- Added the `renderIcon` property to the Tree component to control the display of level icons
+- Tree->actionItem added show attribute, used to dynamically control button display
+- New toolbar/title/search function for Tree
+- Added department management/password modification/account management/role management/menu management sample interface
+
+### ⚡ Performance Improvements
+
+- Optimized login interface animation
+- Fix the problem of excessively large github warehouse.
+- Hide table full screen button by default
+- `crypto-es` is changed to `crypto-js` to reduce the package size
+- `types` directory moved to the root directory, compatible with other directory global types
+
+### 🐛 Bug Fixes
+
+- Fix the warning problem of verification code component
+- Fix the table cannot get the selected row correctly
+- Fixed modal height calculation error in full screen state
+- Fix some table style issues
+- Fix the invalidation of the tree form `indentSize` setting
+
+## 2.0.1 (2021-02-21)
+
+### ✨ Refactor
+
+- Refactored login page, new registration page/reset password page/mobile phone login/QR code login
+
+### ✨ Features
+
+- Added the `settingButtonPosition` configuration item for configuring the position of the `settings` button
+- `modal` can switch the full screen by double-clicking the head
+- Added `CountDownInput` component
+
+### ⚡ Performance Improvements
+
+- Optimize the editable center style and the width of the drop-down box is too short
+- The `edit-change` event listener when the table is added and edited
+
+### 🐛 Bug Fixes
+
+- Fix image preview style error
+- Fix icon style problem
+- Fix the drop-down echo problem of editable table
+
+## 2.0.0 (2021-02-18)
+
+## Breaking changes
+
+- `echarts` is upgraded to 5.0 and introduced on demand (just use `useECharts`).
+
+### ✨ Refactor
+
+- Removed `global.less`, `mixin.less`, `design/helper`, replaced by `windicss`, and need to modify the corresponding styles if they are useful
+
+### ✨ Features
+
+- useModal adds the return value function `redoModalHeight`, which is used to refresh the modal height when the modal is dynamic content
+- Upgrade husky to 5.0
+- Added `brotli`|`gzip` compression and related test commands
+- Re-introduction of `windicss` (same as `tailwind`). Faster in speed
+
+### ⚡ Performance Improvements
+
+- Adjust the return value of the interface to obtain user information in array format
+- Fix the error-log list as the system route
+
+### 🐛 Bug Fixes
+
+- Fix the issue of upload component maxNumber invalid
+- Fix package sourcemap error report
+- Fix code debugger location display error
+- Fix the issue of mock plugin post request error
+- Fix some themes color value error
+- Fix the table in editable row status and press Enter to confirm
+
+### 🎫 Chores
+
+- Documentation update
+- Upgrade ant-design-vue to `2.0.0`
+- Upgrade vite to `2.0.0`
+
+## 2.0.0-rc.18 (2021-02-05)
+
+### ✨ Features
+
+- `ApiSelect` adds `numberToString` property, which is used to convert all the value of `number` into `string`
+- Added theme color switch
+- Packed image compression
+
+### ⚡ Performance Improvements
+
+When mock is not used, move `mock.js` out of the package file
+
+### 🐛 Bug Fixes
+
+- Fix modal height calculation error
+- Fix the pop-up menu when the menu is clicked on the tab when the menu is collapsed
+- Fix the problem that the initial value of form is 0
+- Fix table wrapping problem
+- Fix the menu outside link does not jump
+- Fix the display problem at the top of the menu
+- Fix the issue of `modifyVars` configuration failure
+
+## 2.0.0-rc.17 (2020-01-18)
+
+### ✨ Refactor
+
+- Added `SimpleMenu` component to replace the left menu component (the top menu is not replaced, the function should be as simple as possible without stuck). Solve the menu stuck problem.
+- The `ant-design-vue` component is no longer registered globally. In order to better coordinate with the introduction of css on demand. If you need to register globally, you need to add it yourself
+
+### ✨ Features
+
+- `css` import on demand
+
+### 🐛 Bug Fixes
+
+- Fix `TableAction` icon problem
+- Fix the problem of missing menu folding buttons
+- Fix menu related issues
+- Fix moment multilingual issue
+
+## 2.0.0-rc.16 (2020-01-12)
+
+### ✨ Refactor
+
+- Independent component configuration to `/@/settings/componentsSetting`
+- `colorSetting` and `designSetting` are now merged into `designSetting`
+- `ant-design-vue` component registration moved to `components/registerComponent`
+- Remove the `setup` folder
+- Upgrade to `vite2`
+- Image preview is changed to `Image` component implementation, temporarily removing functional usage
+
+### ✨ Features
+
+- Added `mixSideTrigger` configuration. Used to configure how to open the mixed mode menu on the left. Optional `hover`, default `click`
+- Added `mixSideFixed` configuration. Used to fix the left mixed mode menu
+- Added `height` and `min-height` properties to the modal component
+- Added `PageWrapper` component. And applied to the sample page
+- Added tab folding function
+- Compatible with older browsers
+- tinymce new image upload
+
+### 🐛 Bug Fixes
+
+- Fix known issues with table column configuration
+- Restore the `isTreeTable` property of the table
+- Fix table memory overflow problem
+- Fix the function of `layout` shrinking and expanding in split mode
+- Fix modal height calculation error
+- Fix file upload error
+
+## 2.0.0-rc.15 (2020-12-31)
+
+### ✨ Table destructive update
+
+- Refactored editable cells and editable rows. See examples for details. The writing has changed. For editable tables.
+
+- Form editing supports form validation
+
+- Added the following configuration in the table column configuration
+
+```bash
+{
+
+  # Whether to display columns by default. Those that are not displayed can be opened in the column configuration
+  defaultHidden?: boolean;
+  # Help text on the right side of the column header
+  helpMessage?: string | string[];
+  # Custom formatting Cell content. Support time/enumeration automatic conversion
+  format?: CellFormat;
+
+  # Editable
+  # Is it an editable cell
+  edit?: boolean;
+  # Is it an editable line
+  editRow?: boolean;
+  # Edit status.
+  editable?: boolean;
+  # Edit component
+  editComponent?: ComponentType;
+  # The parameters of the corresponding component
+  editComponentProps?: Recordable;
+  # Check
+  editRule?: boolean | ((text: string, record: Recordable) => Promise<string>);
+  # Value enumeration conversion
+  editValueMap?: (value: any) => string;
+  # Trigger editing Zhenghang
+  record.onEditRow?: () => void;
+}
+
+```
+
+### ✨ Table reconstruction
+
+- Added `clickToRowSelect` attribute. Used to control whether the clicked row is checked or not
+- Monitor row click event
+- Add column drag and drop and column fix function for the table column configuration button.
+- Added `defaultHidden` attribute to table column configuration. Used to hide by default. You can configure the tick display in the table column
+- More powerful column configuration
+- useTable: Support for dynamically changing parameters. You can pass in `Ref` type and `Computed` type for dynamic changes
+- useTable: Added return function `getForm`. Can be used to manipulate forms in the form Fix known issues in the table
+
+### ✨ Features
+
+- Added `v-ripple` water ripple command
+- Added the left menu mixed mode
+- Add an example of markdown embedded in the form
+- Add an example of a page outside the main frame
+- `route.meta` added `currentActiveMenu`, `hideTab`, and `hideMenu` parameters to control the display and hide of the crumb-level menu on the detail page.
+- Added breadcrumb navigation example
+- form: Added `suffix` attribute to configure suffix content
+- form: Added remote drop-down `ApiSelect` and examples
+- form: Add `autoFocusFirstItem` configuration. Used to configure whether to focus on the first input box of the form
+- useForm: Support for dynamically changing parameters. You can pass in `Ref` type and `Computed` type for dynamic changes
+
+### ⚡ Performance Improvements
+
+- Optimize the scroll bar components of `modal` and `drawer`
+- table: remove the `isTreeTable` attribute
+- Import `less` files globally. No need to manually re-introduce the component
+
+### 🎫 Chores
+
+- Upgrade `ant-design-vue` to `2.0.0-rc.7`
+- Upgrade `vue` to `3.0.5`
+
+### 🐛 Bug Fixes
+
+- Fixed the issue of missing scroll bars in mixed mode
+- Fix the invalid configuration of environment variables and the logo address problem in history mode
+- Fix the calculation error of width and height caused by switching page of chart library
+- Fixed the issue of multi-language configuration `Locale.show` causing the configuration not to take effect
+- Fix routing type error
+- Fix the problem of invalid permissions when the menu is split
+- Iframe loads early when closing multi-tab pages
+- Fix known issues with `modal` and `drawer`
+- Fix the problem of mixing mode adaptation in the left menu
+
 ## 2.0.0-rc.14 (2020-12-15)
 
 ### ✨ Features

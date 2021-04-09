@@ -1,19 +1,25 @@
 import { HandlerEnum } from './enum';
-import {
-  updateColorWeak,
-  updateGrayMode,
-  updateHeaderBgColor,
-  updateSidebarBgColor,
-} from '/@/setup/theme';
+import { updateHeaderBgColor, updateSidebarBgColor } from '/@/logics/theme/updateBackground';
+import { updateColorWeak } from '/@/logics/theme/updateColorWeak';
+import { updateGrayMode } from '/@/logics/theme/updateGrayMode';
+
 import { appStore } from '/@/store/modules/app';
-import { ProjectConfig } from '/@/types/config';
+import { ProjectConfig } from '/#/config';
+import { changeTheme } from '/@/logics/theme';
+import { updateDarkTheme } from '/@/logics/theme/dark';
+import { useRootSetting } from '/@/hooks/setting/useRootSetting';
 
 export function baseHandler(event: HandlerEnum, value: any) {
   const config = handler(event, value);
   appStore.commitProjectConfigState(config);
+  if (event === HandlerEnum.CHANGE_THEME) {
+    updateHeaderBgColor();
+    updateSidebarBgColor();
+  }
 }
 
 export function handler(event: HandlerEnum, value: any): DeepPartial<ProjectConfig> {
+  const { getThemeColor, getDarkMode } = useRootSetting();
   switch (event) {
     case HandlerEnum.CHANGE_LAYOUT:
       const { mode, type, split } = value;
@@ -25,9 +31,26 @@ export function handler(event: HandlerEnum, value: any): DeepPartial<ProjectConf
           type,
           collapsed: false,
           show: true,
+          hidden: false,
           ...splitOpt,
         },
       };
+
+    case HandlerEnum.CHANGE_THEME_COLOR:
+      if (getThemeColor.value === value) {
+        return {};
+      }
+      changeTheme(value);
+
+      return { themeColor: value };
+
+    case HandlerEnum.CHANGE_THEME:
+      if (getDarkMode.value === value) {
+        return {};
+      }
+      updateDarkTheme(value);
+
+      return { darkMode: value };
 
     case HandlerEnum.MENU_HAS_DRAG:
       return { menuSetting: { canDrag: value } };
@@ -47,11 +70,11 @@ export function handler(event: HandlerEnum, value: any): DeepPartial<ProjectConf
     case HandlerEnum.MENU_WIDTH:
       return { menuSetting: { menuWidth: value } };
 
-    case HandlerEnum.MENU_COLLAPSED_SHOW_TITLE:
-      return { menuSetting: { collapsedShowTitle: value } };
-
     case HandlerEnum.MENU_SHOW_SIDEBAR:
       return { menuSetting: { show: value } };
+
+    case HandlerEnum.MENU_COLLAPSED_SHOW_TITLE:
+      return { menuSetting: { collapsedShowTitle: value } };
 
     case HandlerEnum.MENU_THEME:
       updateSidebarBgColor(value);
@@ -60,8 +83,17 @@ export function handler(event: HandlerEnum, value: any): DeepPartial<ProjectConf
     case HandlerEnum.MENU_SPLIT:
       return { menuSetting: { split: value } };
 
+    case HandlerEnum.MENU_CLOSE_MIX_SIDEBAR_ON_CHANGE:
+      return { menuSetting: { closeMixSidebarOnChange: value } };
+
     case HandlerEnum.MENU_FIXED:
       return { menuSetting: { fixed: value } };
+
+    case HandlerEnum.MENU_TRIGGER_MIX_SIDEBAR:
+      return { menuSetting: { mixSideTrigger: value } };
+
+    case HandlerEnum.MENU_FIXED_MIX_SIDEBAR:
+      return { menuSetting: { mixSideFixed: value } };
 
     // ============transition==================
     case HandlerEnum.OPEN_PAGE_LOADING:
@@ -113,8 +145,12 @@ export function handler(event: HandlerEnum, value: any): DeepPartial<ProjectConf
 
     case HandlerEnum.TABS_SHOW:
       return { multiTabsSetting: { show: value } };
+
     case HandlerEnum.TABS_SHOW_REDO:
       return { multiTabsSetting: { showRedo: value } };
+
+    case HandlerEnum.TABS_SHOW_FOLD:
+      return { multiTabsSetting: { showFold: value } };
 
     // ============header==================
     case HandlerEnum.HEADER_THEME:
